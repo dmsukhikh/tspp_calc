@@ -1,9 +1,8 @@
 #ifndef __MATRIX_GENERIC
 #define __MATRIX_GENERIC
 
+#include <cstdint>
 #include <vector>
-#include <algorithm>
-#include <stdint.h>
 
 template <typename T> class MatrixGeneric
 {
@@ -26,6 +25,16 @@ template <typename T> class MatrixGeneric
     MatrixGeneric &operator=(MatrixGeneric &&) = default;
 
     virtual ~MatrixGeneric() = default;
+
+    T& get(uint32_t x, uint32_t y)
+    {
+        return _data[x][y];
+    }
+
+    const T& get(uint32_t x, uint32_t y) const
+    {
+        return _data[x][y];
+    }
 
   private:
     uint32_t _height, _width;
