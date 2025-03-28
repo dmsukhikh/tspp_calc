@@ -6,7 +6,7 @@ option(DEBUG_BUILD "Project is builded for debug" ON)
 if (DEBUG_BUILD)
     set(CMAKE_BUILD_TYPE Debug)
     # for language server support
-    set(CMAKE_EXPORT_COMPILE_OPTIONS ON)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     # main.cpp for manual testing
     add_executable(main test/main.cpp)
