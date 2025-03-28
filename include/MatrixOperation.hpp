@@ -17,6 +17,9 @@ using SubsType = decltype(std::declval<A>() - std::declval<B>());
 template <typename A, typename B>
 using MulType = decltype(std::declval<A>() * std::declval<B>());
 
+template <typename A, typename B>
+using DivType = decltype(std::declval<A>() / std::declval<B>());
+
 template <typename First, typename Second>
 MatrixGeneric<AddType<First, Second>> operator+(const MatrixGeneric<First> &a,
                                                 const MatrixGeneric<Second> &b)
@@ -112,6 +115,13 @@ operator*(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
     }
 
     return out;
+}
+
+template <typename A, typename B>
+MatrixGeneric<MulType<A, DivType<B, float>>>
+operator/(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
+{
+    return a * b.inverse();
 }
 
 #endif

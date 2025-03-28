@@ -199,6 +199,60 @@ template <typename T> class MatrixGeneric
         return out;
     }
 
+    uint32_t rk() const
+    {
+        MatrixGeneric<DivType<float, T>> _copy(_height, _width);
+        for (uint32_t i = 0; i < _width * _height; ++i)
+        {
+            _copy.get(i/_width, i%_width) = _data[i];
+        }
+        uint32_t rank = std::min(_height, _width);
+
+        for (uint32_t row = 0; row < rank; row++)
+        {
+            if (_copy.get(row, row))
+            {
+                for (uint32_t col = 0; col < _height; col++)
+                {
+                    if (col != row)
+                    {
+                        auto mult =
+                            (float)_copy.get(col, row) / _copy.get(row, row);
+                        for (uint32_t i = 0; i < rank; i++)
+                            _copy.get(col, i) -= mult * _copy.get(row, i);
+                    }
+                }
+            }
+            else
+            {
+                bool reduce = true;
+                for (uint32_t i = row + 1; i < _height;  i++)
+                {
+                    if (_copy.get(i, row))
+                    {
+                        for (uint32_t j = 0; j < rank; j++)
+                        {
+                            T temp = _copy.get(row, j);
+                            _copy.get(row, j) = _copy.get(i, j);
+                            _copy.get(i, j) = temp;
+                        }
+                        reduce = false;
+                        break;
+                    }
+                }
+
+                if (reduce)
+                {
+                    rank--;
+                    for (uint32_t i = 0; i < _height; i ++)
+                        _copy.get(i, row) = _copy.get(i, rank);
+                }
+                row--;
+            }
+        }
+        return rank;
+    }
+
   private:
     uint32_t _height, _width;
     std::vector<T> _data;
