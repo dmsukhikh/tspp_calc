@@ -95,6 +95,11 @@ template <typename T> class MatrixGeneric
         return _width;
     }
 
+    T det() const
+    {
+        return T();
+    }
+
     template <typename A, typename B>
     friend MatrixGeneric<AddType<A, B>> operator+(const MatrixGeneric<A> &a,
                                                   const MatrixGeneric<B> &b);
@@ -111,9 +116,67 @@ template <typename T> class MatrixGeneric
     friend MatrixGeneric<MulType<Scalar, G>>
     operator*(Scalar scalar, const MatrixGeneric<G> &a);
 
+    T det()
+    {
+        if (_height != _width)
+            throw std::range_error("Bad determinant: matrix isn't square");
+
+        if (_height == 1 && _width == 1)
+            return _data[0]; 
+        
+        auto out = T(); // правильно ли?
+        for (uint32_t i = 0; i < _width; ++i)
+        {
+            out += _data[i] * _cofactor(0, i).det() * (i % 2 ? 1 : -1);
+        }
+        return out;
+    }
+
+
+    void transpose()
+    {
+        std::vector<T> _new_data(_width * _height);
+        for (uint32_t i = 0; i < _height; ++i)
+        {
+            for (uint32_t j = 0; j < _width; ++j)
+            {
+                _new_data[j*_height + i] = _data[i*_width + j];
+            }
+        }
+
+        std::swap(_height, _width);
+        _data = std::move(_new_data);
+    }
+
   private:
     uint32_t _height, _width;
     std::vector<T> _data;
+
+    MatrixGeneric _cofactor(uint32_t i, uint32_t j)
+    {
+        if (i >= _height)
+            throw std::range_error("i is out of range");
+        if (j >= _width)
+            throw std::range_error("j is out of range");
+
+        MatrixGeneric out = *this;
+
+        auto cnt = 0;
+        auto deleter = [&cnt, i, j, this](const T&)
+        {
+            auto pred = cnt / _width == i || cnt % _width == j;
+            ++cnt;
+            return pred;
+        };
+
+        auto to_del =
+            std::remove_if(out._data.begin(), out._data.end(), deleter);
+        out._data.erase(to_del, out._data.end());
+        out._height--;
+        out._width--;
+
+        return out;
+    }
 };
 
 #endif
