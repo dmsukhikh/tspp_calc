@@ -47,6 +47,16 @@ template <typename T> class MatrixGeneric
         }
     }
 
+    static MatrixGeneric eye(uint32_t size)
+    {
+        MatrixGeneric<T> out(size, size);
+        for (uint32_t i = 0; i < size; ++i)
+        {
+            out.get(i, i) = T(1);
+        }
+        return out;
+    }
+
     MatrixGeneric(MatrixGeneric &&other)
     {
         *this = std::move(other);
@@ -65,7 +75,7 @@ template <typename T> class MatrixGeneric
         return *this;
     }
 
-    virtual ~MatrixGeneric() = default;
+    ~MatrixGeneric() = default;
 
     T& get(uint32_t x, uint32_t y)
     {
@@ -95,11 +105,6 @@ template <typename T> class MatrixGeneric
         return _width;
     }
 
-    T det() const
-    {
-        return T();
-    }
-
     template <typename A, typename B>
     friend MatrixGeneric<AddType<A, B>> operator+(const MatrixGeneric<A> &a,
                                                   const MatrixGeneric<B> &b);
@@ -116,7 +121,11 @@ template <typename T> class MatrixGeneric
     friend MatrixGeneric<MulType<Scalar, G>>
     operator*(Scalar scalar, const MatrixGeneric<G> &a);
 
-    T det()
+    template <typename A, typename B>
+    friend MatrixGeneric<MulType<A, DivType<B, float>>>
+    operator/(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
+
+    T det() const
     {
         if (_height != _width)
             throw std::range_error("Bad determinant: matrix isn't square");
@@ -148,11 +157,53 @@ template <typename T> class MatrixGeneric
         _data = std::move(_new_data);
     }
 
+    MatrixGeneric<DivType<T, float>> inverse() const
+    {
+        if (_height != _width)
+            throw std::range_error("Bad inverse: matrix isn't square");
+
+        MatrixGeneric<DivType<T, float>> out(_height, _width);
+
+        auto delta = det();
+        if (delta == 0)
+            throw std::runtime_error("Bad determinant: equal zero");
+
+        for (uint32_t i = 0; i < _height; ++i)
+        {
+            for (uint32_t j = 0; j < _width; ++j)
+            {
+                out.get(i, j) = ((i + j) % 2 ? 1 : -1) * _cofactor(i, j).det();
+            }
+        }
+
+        out.transpose();
+        out = (1.f / delta) * out;
+        return out;
+    }
+
+    MatrixGeneric pow(uint32_t power)
+    {
+        if (_height != _width)
+            throw std::range_error("Bad pow: matrix isn't square");
+
+        if (power == 0)
+            return MatrixGeneric<T>::eye(_height);
+
+        MatrixGeneric<T> out(*this);
+
+        while (power > 1)
+        {
+            out = out * *this;
+            --power;
+        }
+        return out;
+    }
+
   private:
     uint32_t _height, _width;
     std::vector<T> _data;
 
-    MatrixGeneric _cofactor(uint32_t i, uint32_t j)
+    MatrixGeneric _cofactor(uint32_t i, uint32_t j) const
     {
         if (i >= _height)
             throw std::range_error("i is out of range");
