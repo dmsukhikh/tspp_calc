@@ -3,10 +3,11 @@ project('tspp_calc')
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(DEBUG_BUILD "Project will build for debug" ON)
-
-if (DEBUG_BUILD)
+if (NOT DEFINED ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     # for language server support
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
     set(COMPILE_FLAGS -Wall -Wextra -Wpedantic 
@@ -41,4 +42,10 @@ if (DEBUG_BUILD)
     include(GoogleTest)
     gtest_discover_tests(tests)
 endif()
+
+set(FILES_FOR_INSTALL include/MatrixOperation.hpp
+                      include/MatrixGeneric.hpp
+                      include/Exceptions.hpp)
+
+install(FILES ${FILES_FOR_INSTALL} DESTINATION matrix_calc)
 
