@@ -14,5 +14,7 @@ void print_matrix(const MatrixGeneric<T> &g)
     }
 }
 
+template <typename T>
+using InitList = std::initializer_list<std::initializer_list<T>>;
 int main() {
 }

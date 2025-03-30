@@ -28,6 +28,7 @@ if (DEBUG_BUILD)
 
     enable_testing()
     add_executable(tests test/test_basic.cpp)
+    target_include_directories(tests PRIVATE include)
     target_link_libraries(
       tests
       GTest::gtest_main
