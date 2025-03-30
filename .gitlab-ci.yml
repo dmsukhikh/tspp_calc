@@ -33,9 +33,9 @@ deploy-centos-job:
     - build-centos-job
   script:
     - cd build
-    - cmake --install . --prefix . --config Release
+    - cmake --install . --prefix .. --config Release
   tags:
     - centos
   artifacts:
     paths:
-      - "build/matrix_calc/"
+      - "matrix_calc/"
