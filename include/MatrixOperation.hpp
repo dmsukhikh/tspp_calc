@@ -1,9 +1,9 @@
 #ifndef __MATRIX_OPS
 #define __MATRIX_OPS
 
-#include <stdexcept>
 #include <cstdint>
 #include <string>
+#include "Exceptions.hpp"
 
 // forward declaration
 template <typename T> class MatrixGeneric;
@@ -32,10 +32,10 @@ MatrixGeneric<AddType<First, Second>> operator+(const MatrixGeneric<First> &a,
         what += std::to_string(a.height()) + "x" + std::to_string(a.width());
         what += " != ";
         what += std::to_string(b.height()) + "x" + std::to_string(b.width());
-        throw std::range_error(what);
+        throw matrix_bad_operation(what.c_str());
     }
 
-    RetType out(a.height(), b.height());
+    RetType out(a.height(), a.width());
     for (uint32_t i = 0; i < out.height() * out.width(); ++i)
     {
         out._data[i] = a._data[i] + b._data[i]; 
@@ -72,10 +72,10 @@ MatrixGeneric<SubsType<A, B>> operator-(const MatrixGeneric<A> &a, const MatrixG
         what += std::to_string(a.height()) + "x" + std::to_string(a.width());
         what += " != ";
         what += std::to_string(b.height()) + "x" + std::to_string(b.width());
-        throw std::range_error(what);
+        throw matrix_bad_operation(what.c_str());
     }
 
-    RetType out(a.height(), b.height());
+    RetType out(a.height(), a.width());
     for (uint32_t i = 0; i < out.height() * out.width(); ++i)
     {
         out._data[i] = a._data[i] - b._data[i]; 
@@ -97,7 +97,7 @@ operator*(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
         what += std::to_string(a.height()) + "x" + std::to_string(a.width());
         what += " and ";
         what += std::to_string(b.height()) + "x" + std::to_string(b.width());
-        throw std::range_error(what);
+        throw matrix_bad_operation(what.c_str());
     }
 
     MatrixGeneric<RetType> out(a.height(), b.width());
@@ -121,6 +121,8 @@ template <typename A, typename B>
 MatrixGeneric<MulType<A, DivType<B, float>>>
 operator/(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
 {
+    if (b.width() != b.height())
+        throw matrix_bad_operation("Denominator isn't square");
     return a * b.inverse();
 }
 

@@ -49,4 +49,11 @@ public:
         basic_matrix_exception(msg) {}
 };
 
+class matrix_bad_operation: public basic_matrix_exception 
+{
+public:
+    matrix_bad_operation(const char *msg) :
+        basic_matrix_exception(msg) {}
+};
+
 #endif
