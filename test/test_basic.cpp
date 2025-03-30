@@ -14,6 +14,10 @@ TEST(TestBasic, DefaultConstructorTest)
     MatrixGeneric<double> b;
     MatrixGeneric<short> c;
     });
+
+    MatrixGeneric<int> a;
+    EXPECT_EQ(a.height(), 0);
+    EXPECT_EQ(a.width(), 0);
 }
 
 template <typename T>
