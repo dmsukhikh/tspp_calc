@@ -27,7 +27,8 @@ if (DEBUG_BUILD)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
-    add_executable(tests test/test_basic.cpp)
+    add_executable(tests test/test_basic.cpp
+                         test/test_funcs.cpp)
     target_include_directories(tests PRIVATE include)
     target_link_libraries(
       tests
