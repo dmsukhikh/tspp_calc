@@ -1,7 +1,7 @@
 stages:
   - build
   - test
-  - release
+  - deploy
 
 build-centos-job:
   stage: build
@@ -27,14 +27,15 @@ test-centos-job:
   tags:
     - centos
 
-release_job:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  rules:
-    - if: $CI_COMMIT_TAG                  # Run this job when a tag is created manually
+deploy-centos-job:
+  stage: deploy
+  dependencies: 
+    - build-centos-job
   script:
-    - echo "Running the release job."
-  release:
-    tag_name: $CI_COMMIT_TAG
-    name: 'Release $CI_COMMIT_TAG'
-    description: 'Release created using the release-cli.'
+    - cd build
+    - cmake --install . --prefix . --config Release
+  tags:
+    - centos
+  artifacts:
+    paths:
+      - "matrix_calc/"
