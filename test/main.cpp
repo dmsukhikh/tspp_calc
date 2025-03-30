@@ -14,7 +14,10 @@ void print_matrix(const MatrixGeneric<T> &g)
     }
 }
 
-template <typename T>
-using InitList = std::initializer_list<std::initializer_list<T>>;
 int main() {
+
+    MatrixGeneric a = {{1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}, {5, 6, 1, 2, 3}};
+    MatrixGeneric b = {{0, 2, 1, 4, 5}, {-10, 2, 30, 4, 25}, {5, -6, 1, 2, 3}};
+
+    print_matrix(a + b);
 }
