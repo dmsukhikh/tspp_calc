@@ -38,4 +38,4 @@ deploy-centos-job:
     - centos
   artifacts:
     paths:
-      - "matrix_calc/"
+      - "build/matrix_calc/"
