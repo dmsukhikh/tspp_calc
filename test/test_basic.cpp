@@ -77,8 +77,8 @@ TEST(TestBasic, WidthHeightConstructorTest)
 
     // Инициализация прямоугольной матрицы
     MatrixGeneric<int> b(3, 7);
-    ASSERT_EQ(a.width(), 7) << log(3, 7);
-    ASSERT_EQ(a.height(), 3) << log(3, 7, false);
+    ASSERT_EQ(b.width(), 7) << log(3, 7);
+    ASSERT_EQ(b.height(), 3) << log(3, 7, false);
 
     // Инициализация нулями
     EXPECT_THROW(MatrixGeneric<int>(0, 10), matrix_initialization_error)

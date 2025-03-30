@@ -16,6 +16,11 @@ template <typename T> class MatrixGeneric
     explicit MatrixGeneric(uint32_t height, uint32_t width)
         : _height(height), _width(width)
     {
+        if ((_height == 0 && _width != 0) || (_width == 0 && _height != 0))
+        {
+            throw matrix_initialization_error(
+                "Only both height and width can be zero");
+        }
         _data.resize(_height * _width);
     }
 

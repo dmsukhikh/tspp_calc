@@ -133,7 +133,7 @@ bool operator==(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
     if (a._data.size() != b._data.size())
         return false;
 
-    bool output = true;
+    bool output = a.width() == b.width() && a.height() == b.height();
     for (std::size_t i = 0; i < a._data.size(); ++i)
     {
         output = output && comp(a._data[i], b._data[i]);
