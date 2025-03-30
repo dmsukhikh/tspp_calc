@@ -9,13 +9,13 @@ if (DEBUG_BUILD)
     set(CMAKE_BUILD_TYPE Debug)
     # for language server support
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    set(COMPILE_FLAGS -Wall -Wextra -Wpedantic 
+    -std=c++17 -g -fsanitize=address -fsanitize=leak)
 
     # main.cpp for manual testing
     add_executable(main test/main.cpp)
     target_include_directories(main PRIVATE include)
-    target_compile_options(main PRIVATE -Wall -Wextra -Wpedantic 
-                                        -std=c++17 -g -fsanitize=address
-                                        -fsanitize=leak)
+    target_compile_options(main PRIVATE ${COMPILE_FLAGS})
     target_link_options(main PRIVATE -fsanitize=address)
 
     # testing
@@ -28,12 +28,16 @@ if (DEBUG_BUILD)
 
     enable_testing()
     add_executable(tests test/test_basic.cpp
-                         test/test_funcs.cpp)
+                         test/test_funcs.cpp
+                         test/test_ops.cpp)
     target_include_directories(tests PRIVATE include)
     target_link_libraries(
       tests
       GTest::gtest_main
     )
+
+    # target_compile_options(main PRIVATE ${COMPILE_FLAGS})
+    # target_link_options(tests PRIVATE -fsanitize=address)
     include(GoogleTest)
     gtest_discover_tests(tests)
 endif()
