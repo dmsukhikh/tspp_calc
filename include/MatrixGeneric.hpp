@@ -136,19 +136,14 @@ template <typename T> class MatrixGeneric
         if (_height != _width)
             throw matrix_bad_det("Matrix isn't square"); 
 
-        if (_height == 1 && _width == 1)
-            return _data[0]; 
-        
-        auto out = T(); // правильно ли?
-        for (uint32_t i = 0; i < _width; ++i)
-        {
-            out += _data[i] * _cofactor(0, i).det() * (i % 2 ? 1 : -1);
-        }
-        return out;
+        if (_height == 0 && _width == 0)
+            return 1; 
+
+        return _gauss().second;    
     }
 
 
-    void transpose()
+    MatrixGeneric transpose()
     {
         std::vector<T> _new_data(_width * _height);
         for (uint32_t i = 0; i < _height; ++i)
@@ -159,14 +154,15 @@ template <typename T> class MatrixGeneric
             }
         }
 
-        std::swap(_height, _width);
-        _data = std::move(_new_data);
+        MatrixGeneric<T> out(_width, _height);
+        out._data = std::move(_new_data);
+        return out;
     }
 
     MatrixGeneric<DivType<T, float>> inverse() const
     {
         if (_height != _width)
-            throw matrix_bad_det("Matrix isn't square");
+            throw matrix_bad_inverse("Matrix isn't square");
 
         MatrixGeneric<DivType<T, float>> out(_height, _width);
 
@@ -178,12 +174,11 @@ template <typename T> class MatrixGeneric
         {
             for (uint32_t j = 0; j < _width; ++j)
             {
-                out.get(i, j) = ((i + j) % 2 ? 1 : -1) * _cofactor(i, j).det();
+                out.get(i, j) = ((i + j) % 2 ? -1 : 1) * _cofactor(i, j).det();
             }
         }
 
-        out.transpose();
-        out = (1.f / delta) * out;
+        out = (1.f / delta) * out.transpose();
         return out;
     }
 
@@ -207,60 +202,11 @@ template <typename T> class MatrixGeneric
 
     uint32_t rk() const
     {
-        MatrixGeneric<DivType<float, T>> _copy(_height, _width);
-        for (uint32_t i = 0; i < _width * _height; ++i)
-        {
-            _copy.get(i/_width, i%_width) = _data[i];
-        }
-        uint32_t rank = std::min(_height, _width);
-
-        for (uint32_t row = 0; row < rank; row++)
-        {
-            if (_copy.get(row, row))
-            {
-                for (uint32_t col = 0; col < _height; col++)
-                {
-                    if (col != row)
-                    {
-                        auto mult =
-                            (float)_copy.get(col, row) / _copy.get(row, row);
-                        for (uint32_t i = 0; i < rank; i++)
-                            _copy.get(col, i) -= mult * _copy.get(row, i);
-                    }
-                }
-            }
-            else
-            {
-                bool reduce = true;
-                for (uint32_t i = row + 1; i < _height;  i++)
-                {
-                    if (_copy.get(i, row))
-                    {
-                        for (uint32_t j = 0; j < rank; j++)
-                        {
-                            T temp = _copy.get(row, j);
-                            _copy.get(row, j) = _copy.get(i, j);
-                            _copy.get(i, j) = temp;
-                        }
-                        reduce = false;
-                        break;
-                    }
-                }
-
-                if (reduce)
-                {
-                    rank--;
-                    for (uint32_t i = 0; i < _height; i ++)
-                        _copy.get(i, row) = _copy.get(i, rank);
-                }
-                row--;
-            }
-        }
-        return rank;
+        return _gauss().first;
     }
 
   private:
-    uint32_t _height, _width;
+    uint32_t _height{0}, _width{0};
     std::vector<T> _data;
 
     MatrixGeneric _cofactor(uint32_t i, uint32_t j) const
@@ -287,6 +233,74 @@ template <typename T> class MatrixGeneric
         out._width--;
 
         return out;
+    }
+
+    std::pair<uint32_t, T> _gauss() const
+    {
+        // Метод Гаусса приведения матрицы к верхнетреугольному виду. 1 - ранг,
+        // 2 - определитель
+
+        char sign = 1;
+
+        MatrixGeneric<DivType<float, T>> _copy(_height, _width);
+        for (uint32_t i = 0; i < _width * _height; ++i)
+        {
+            _copy.get(i/_width, i%_width) = _data[i];
+        }
+        uint32_t rank = std::min(_height, _width);
+
+        for (uint32_t row = 0; row < rank; row++)
+        {
+            if (_copy.get(row, row) != 0)
+            {
+                for (uint32_t targetRow = 0; targetRow < _height; targetRow++)
+                {
+                    if (targetRow != row)
+                    {
+                        auto mult = (float)_copy.get(targetRow, row) /
+                                    _copy.get(row, row);
+                        for (uint32_t i = 0; i < rank; i++)
+                            _copy.get(targetRow, i) -= mult * _copy.get(row, i);
+                    }
+                }
+            }
+            else
+            {
+                bool reduce = true;
+                for (uint32_t i = row + 1; i < _height; i++)
+                {
+                    if (_copy.get(i, row) != 0)
+                    {
+                        for (uint32_t targetRow = 0; targetRow < rank;
+                             targetRow++)
+                        {
+                            std::swap(_copy.get(row, targetRow),
+                                      _copy.get(i, targetRow));
+                        }
+                        reduce = false;
+                        sign *= -1;
+                        break;
+                    }
+                }
+
+                if (reduce)
+                {
+                    rank--;
+                    sign = 0;
+                    for (uint32_t i = 0; i < _height; i ++)
+                        _copy.get(i, row) = _copy.get(i, rank);
+                }
+                row--;
+            }
+        }
+        
+        T absdet = (_width == 0 && _height == 0) ? 0 : 1;
+        for (uint32_t i = 0; i < std::min(_width, _height); ++i)
+        {
+            absdet *= _copy.get(i, i);
+        }
+
+        return {rank, absdet*sign};
     }
 };
 
