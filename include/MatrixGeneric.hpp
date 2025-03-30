@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include "MatrixOperation.hpp"
+#include "Exceptions.hpp"
 
 template <typename T> class MatrixGeneric
 {
@@ -33,7 +34,7 @@ template <typename T> class MatrixGeneric
                                        [width](const std::initializer_list<T> &raw)
                                        { return raw.size() == width; });
         if (!isValidList)
-            throw std::range_error("Invalid initializer list");
+            throw matrix_initialization_error("Invalid initializer list");
         
         _width = width;
         _height = height;
@@ -89,7 +90,7 @@ template <typename T> class MatrixGeneric
         auto idx = x * _width + y;
         if (idx >= _width * _height)
         {
-            throw std::range_error("Indexing is out of range");
+            throw matrix_bad_access("Indexing is out of range");
         }
 
         return _data[x*_width + y];
@@ -128,7 +129,7 @@ template <typename T> class MatrixGeneric
     T det() const
     {
         if (_height != _width)
-            throw std::range_error("Bad determinant: matrix isn't square");
+            throw matrix_bad_det("Matrix isn't square"); 
 
         if (_height == 1 && _width == 1)
             return _data[0]; 
@@ -160,13 +161,13 @@ template <typename T> class MatrixGeneric
     MatrixGeneric<DivType<T, float>> inverse() const
     {
         if (_height != _width)
-            throw std::range_error("Bad inverse: matrix isn't square");
+            throw matrix_bad_det("Matrix isn't square");
 
         MatrixGeneric<DivType<T, float>> out(_height, _width);
 
         auto delta = det();
         if (delta == 0)
-            throw std::runtime_error("Bad determinant: equal zero");
+            throw matrix_bad_inverse("Matrix determinant equals zero"); 
 
         for (uint32_t i = 0; i < _height; ++i)
         {
@@ -184,7 +185,7 @@ template <typename T> class MatrixGeneric
     MatrixGeneric pow(uint32_t power)
     {
         if (_height != _width)
-            throw std::range_error("Bad pow: matrix isn't square");
+            throw matrix_bad_pow("Matrix isn't square");
 
         if (power == 0)
             return MatrixGeneric<T>::eye(_height);
@@ -260,9 +261,9 @@ template <typename T> class MatrixGeneric
     MatrixGeneric _cofactor(uint32_t i, uint32_t j) const
     {
         if (i >= _height)
-            throw std::range_error("i is out of range");
+            throw matrix_bad_access("i is out of range");
         if (j >= _width)
-            throw std::range_error("j is out of range");
+            throw matrix_bad_access("j is out of range");
 
         MatrixGeneric out = *this;
 
