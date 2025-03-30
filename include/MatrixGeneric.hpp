@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <initializer_list>
 #include <algorithm>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 #include "MatrixOperation.hpp"
@@ -125,6 +124,12 @@ template <typename T> class MatrixGeneric
     template <typename A, typename B>
     friend MatrixGeneric<MulType<A, DivType<B, float>>>
     operator/(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
+
+    template <typename A, typename B>
+    friend bool operator==(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
+
+    template <typename A, typename B>
+    friend bool operator!=(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
 
     T det() const
     {

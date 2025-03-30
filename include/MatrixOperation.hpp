@@ -124,4 +124,25 @@ operator/(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
     return a * b.inverse();
 }
 
+template <typename A, typename B>
+bool operator==(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
+{
+    auto comp = [](const A &first, const B &second) { return first == second; };
+    if (a._data.size() != b._data.size())
+        return false;
+
+    bool output = true;
+    for (std::size_t i = 0; i < a._data.size(); ++i)
+    {
+        output = output && comp(a._data[i], b._data[i]);
+    }
+    return output;
+}
+
+template <typename A, typename B>
+bool operator!=(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
+{
+    return !(a == b);
+}
+
 #endif
