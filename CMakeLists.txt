@@ -1,17 +1,17 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 project('tspp_calc')
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (NOT DEFINED ${CMAKE_BUILD_TYPE})
-    set(CMAKE_BUILD_TYPE Debug)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Debug" FORCE)
 endif()
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     # for language server support
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
     set(COMPILE_FLAGS -Wall -Wextra -Wpedantic 
-    -std=c++17 -g -fsanitize=address -fsanitize=leak)
+    -std=c++11 -g -fsanitize=address -fsanitize=leak)
 
     # main.cpp for manual testing
     add_executable(main test/main.cpp)
@@ -37,8 +37,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
       GTest::gtest_main
     )
 
-    # target_compile_options(main PRIVATE ${COMPILE_FLAGS})
-    # target_link_options(tests PRIVATE -fsanitize=address)
+    target_compile_options(main PRIVATE ${COMPILE_FLAGS})
+    target_link_options(tests PRIVATE -fsanitize=address)
     include(GoogleTest)
     gtest_discover_tests(tests)
 endif()
