@@ -14,7 +14,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     -std=c++11 -g -fsanitize=address -fsanitize=leak)
 
     # main.cpp for manual testing
-    add_executable(main test/main.cpp)
+    add_executable(main test/main_test.cpp)
     target_include_directories(main PRIVATE include)
     target_compile_options(main PRIVATE ${COMPILE_FLAGS})
     target_link_options(main PRIVATE -fsanitize=address)
