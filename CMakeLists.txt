@@ -1,30 +1,33 @@
 cmake_minimum_required(VERSION 3.5)
 project('tspp_calc')
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Debug" FORCE)
 endif()
 
+add_library(build_features INTERFACE)
+target_include_directories(build_features INTERFACE include)
+
 # Исполняемый файл утилиты
-add_executable(main src/main.cpp)
-target_include_directories(main PRIVATE include)
+add_executable(main src/main.cpp
+                    src/Calculator.cpp)
+target_link_libraries(main PRIVATE build_features)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     # for language server support
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
     set(COMPILE_FLAGS -Wall -Wextra -Wpedantic 
-    -std=c++11 -g -fsanitize=address -fsanitize=leak)
+    -std=c++14 -g -fsanitize=address -fsanitize=leak)
+    target_compile_options(build_features INTERFACE ${COMPILE_FLAGS})
+    target_link_options(build_features INTERFACE -fsanitize=address)
+
 
     # main.cpp for manual testing
     add_executable(main_test test/main_test.cpp)
-    target_include_directories(main_test PRIVATE include)
-    target_compile_options(main_test PRIVATE ${COMPILE_FLAGS})
-    target_link_options(main_test PRIVATE -fsanitize=address)
-
-    target_compile_options(main PRIVATE ${COMPILE_FLAGS})
-    target_link_options(main PRIVATE -fsanitize=address)
+    target_link_libraries(main_test PRIVATE build_features)
 
     # testing
     include(FetchContent)
@@ -38,16 +41,15 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     add_executable(tests test/test_basic.cpp
                          test/test_funcs.cpp
                          test/test_ops.cpp)
-    target_include_directories(tests PRIVATE include)
     target_link_libraries(
       tests
       GTest::gtest_main
     )
+    target_link_libraries(tests build_features)
 
-    target_compile_options(main_test PRIVATE ${COMPILE_FLAGS})
-    target_link_options(tests PRIVATE -fsanitize=address)
     include(GoogleTest)
     gtest_discover_tests(tests)
+
 endif()
 
 set(FILES_FOR_INSTALL include/MatrixOperation.hpp
