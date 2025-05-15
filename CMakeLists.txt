@@ -7,6 +7,10 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Debug" FORCE)
 endif()
 
+# Исполняемый файл утилиты
+add_executable(main src/main.cpp)
+target_include_directories(main PRIVATE include)
+
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     # for language server support
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -14,8 +18,11 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     -std=c++11 -g -fsanitize=address -fsanitize=leak)
 
     # main.cpp for manual testing
-    add_executable(main test/main_test.cpp)
-    target_include_directories(main PRIVATE include)
+    add_executable(main_test test/main_test.cpp)
+    target_include_directories(main_test PRIVATE include)
+    target_compile_options(main_test PRIVATE ${COMPILE_FLAGS})
+    target_link_options(main_test PRIVATE -fsanitize=address)
+
     target_compile_options(main PRIVATE ${COMPILE_FLAGS})
     target_link_options(main PRIVATE -fsanitize=address)
 
@@ -37,7 +44,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
       GTest::gtest_main
     )
 
-    target_compile_options(main PRIVATE ${COMPILE_FLAGS})
+    target_compile_options(main_test PRIVATE ${COMPILE_FLAGS})
     target_link_options(tests PRIVATE -fsanitize=address)
     include(GoogleTest)
     gtest_discover_tests(tests)
