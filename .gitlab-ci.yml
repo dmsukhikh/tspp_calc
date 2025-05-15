@@ -18,7 +18,7 @@ stages:
   stage: test
   script:
     - cd build
-    - ctest
+    - ./tests
 
 
 build-centos-job:
