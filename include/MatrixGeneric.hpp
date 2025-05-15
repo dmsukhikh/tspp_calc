@@ -148,7 +148,7 @@ template <typename T> class MatrixGeneric
     }
 
 
-    MatrixGeneric transpose()
+    MatrixGeneric transpose() const
     {
         std::vector<T> _new_data(_width * _height);
         for (uint32_t i = 0; i < _height; ++i)

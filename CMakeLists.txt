@@ -11,9 +11,10 @@ add_library(build_features INTERFACE)
 target_include_directories(build_features INTERFACE include)
 
 # Исполняемый файл утилиты
-add_executable(main src/main.cpp
-                    src/Calculator.cpp)
-target_link_libraries(main PRIVATE build_features)
+add_executable(main ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_library(calc_ins ${CMAKE_SOURCE_DIR}/src/Calculator.cpp)
+target_link_libraries(calc_ins PUBLIC build_features)
+target_link_libraries(main PRIVATE calc_ins)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     # for language server support
@@ -26,7 +27,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
 
 
     # main.cpp for manual testing
-    add_executable(main_test test/main_test.cpp)
+    add_executable(main_test ${CMAKE_SOURCE_DIR}/test/main_test.cpp)
     target_link_libraries(main_test PRIVATE build_features)
 
     # testing
@@ -38,23 +39,30 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
-    add_executable(tests test/test_basic.cpp
-                         test/test_funcs.cpp
-                         test/test_ops.cpp)
+    add_executable(tests ${CMAKE_SOURCE_DIR}/test/test_basic.cpp
+                         ${CMAKE_SOURCE_DIR}/test/test_funcs.cpp
+                         ${CMAKE_SOURCE_DIR}/test/test_ops.cpp
+                         ${CMAKE_SOURCE_DIR}/test/test_util.cpp)
     target_link_libraries(
       tests
       GTest::gtest_main
     )
     target_link_libraries(tests build_features)
+    target_link_libraries(tests calc_ins)
+
+    add_custom_command(
+        TARGET tests PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/test/test_suite $<TARGET_FILE_DIR:tests>/test_suite)
 
     include(GoogleTest)
     gtest_discover_tests(tests)
 
 endif()
 
-set(FILES_FOR_INSTALL include/MatrixOperation.hpp
-                      include/MatrixGeneric.hpp
-                      include/Exceptions.hpp)
-
+set(FILES_FOR_INSTALL   ${CMAKE_SOURCE_DIR}/include/MatrixOperation.hpp
+                        ${CMAKE_SOURCE_DIR}/include/MatrixGeneric.hpp
+                        ${CMAKE_SOURCE_DIR}/include/Exceptions.hpp)
+                      
 install(FILES ${FILES_FOR_INSTALL} DESTINATION matrix_calc)
 
