@@ -133,10 +133,11 @@ template <typename Type> class Calculator
 
                 if (opArgs.size() - 1 < commandsWithArgs[opArgs[0]])
                 {
-                    std::cout << "[calc] error: not enough arguments. "
-                              << commandsWithArgs[opArgs[0]]
-                              << " expected, but " << opArgs.size() - 1
-                              << " was given." << std::endl;
+                    std::cout
+                        << "[calc] error: not enough arguments for operation "
+                        << opArgs[0] << ". " << commandsWithArgs[opArgs[0]]
+                        << " expected, but " << opArgs.size() - 1
+                        << " was given." << std::endl;
                     throw std::exception();
                 }
             }
