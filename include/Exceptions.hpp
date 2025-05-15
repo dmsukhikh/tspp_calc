@@ -2,15 +2,16 @@
 #define __MATRIX_EXCEPT
 
 #include <exception>
+#include <string>
 
 class basic_matrix_exception : public std::exception
 {
-    const char *_msg;
+    std::string _msg;
 public:
     basic_matrix_exception(const char *msg) : _msg(msg) {} 
     const char * what() const noexcept override
     {
-        return _msg;
+        return _msg.c_str();
     }
 };
 
