@@ -38,11 +38,10 @@ test-centos-job:
     .standart_test
   dependencies: 
     - build-centos-job
-  script:
-    - cd build
-    - ctest
   tags:
     - centos
+  needs:
+    - job: build-centos-job
 
 test-ubuntu-job:
   extends:
@@ -51,3 +50,6 @@ test-ubuntu-job:
     - build-ubuntu-job
   tags:
     - ubuntu
+  needs:
+    - job: build-ubuntu-job
+  
