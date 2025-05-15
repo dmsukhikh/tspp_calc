@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <stdexcept>
 
 /*
  * Формат файла с матрицами:
@@ -35,25 +36,16 @@ T getFromStream(std::basic_istream<char, std::char_traits<char>> &stream,
     std::string i;
     if (!(stream >> i))
     {
-        std::cout << "[calc] " << "error: not enough args or elements"
-                  << std::endl;
-        throw std::exception();
+        throw std::runtime_error("not enough args or elements");
     }
 
     try
     {
         return _conversionFromString<T>(i);
     }
-    catch (std::exception &e)
-    {
-        std::cout << "[calc] " << msg << " Information: " << e.what()
-                  << std::endl;
-        throw std::exception();
-    }
     catch (...)
     {
-        std::cout << "[calc] " << msg << std::endl;
-        throw std::exception();
+        throw std::runtime_error(msg);
     }
 }
 
