@@ -9,10 +9,34 @@
 #include "MatrixOperation.hpp"
 #include "Exceptions.hpp"
 
+/** \brief Класс, представляющий матрицу
+ *  \details Класс, представляющий прямоугольную матрицу и реализующий основные
+ * математические операции над ними.
+ *  \tparam T Тип элементов матрицы. Тип должен быть:
+ *   - Конструируемым
+ *   - Иметь конструктор по умолчанию
+ *   - Поддерживать основные арифметические операции: сложение, умножение,
+ * деление и вычитание.
+ */
 template <typename T> class MatrixGeneric
 {
   public:
+    /**
+     * \brief Конструктор по умолчанию
+     * \details Создает пустую матрицу размером 0x0
+     */
     explicit MatrixGeneric() = default;
+
+    /**
+     * \brief Конструктор, создающий матрицу с заданным размером
+     * \details Создается матрица размером **height** x **width**
+     *
+     * \param height Высота матрицы
+     * \param width Ширина матрицы
+     *
+     * \exception matrix_initialization_error В случае, если ширина нулевая, а
+     * высота - нет, и наоборот. Так, нельзя создать матрицу 0x10 или 2x0.
+     */
     explicit MatrixGeneric(uint32_t height, uint32_t width)
         : _height(height), _width(width)
     {
