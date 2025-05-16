@@ -66,6 +66,12 @@ template <typename T> class MatrixGeneric
         
         _width = width;
         _height = height;
+
+        if ((_height == 0 && _width != 0) || (_width == 0 && _height != 0))
+        {
+            throw matrix_initialization_error(
+                "Only both height and width can be zero");
+        }
         
         for (auto &raw: nums)
         {
