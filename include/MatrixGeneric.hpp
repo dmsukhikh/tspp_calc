@@ -187,31 +187,171 @@ template <typename T> class MatrixGeneric
         return _width;
     }
 
+    /**
+     * \brief Сложение двух матриц
+     * \details Складывает две матрицы.
+     *
+     * Временная сложность: O(n), где n - количество элементов в матрице.
+     *
+     * \note Тип элементов возвращаемой матрицы вычисляется как тип,
+     * получающийся в результате сложения двух элементов из разных матриц. Так,
+     * если мы складываем MatrixGeneric<int> и MatrixGeneric<float>, то
+     * получится MatrixGeneric<float>. Таким образом, можно складывать матрицы,
+     * состоящие из элементов разных типов, но которые приводятся один к другому
+     *
+     * \tparam A Тип элеметов первой матрицы
+     * \tparam B Тип элементов второй матрицы
+     * \param a Первая матрицa
+     * \param b Вторая матрица
+     *
+     * \exception matrix_bad_operation Если размеры матриц не совпадают
+     * \return Сумма матриц
+     */
     template <typename A, typename B>
     friend MatrixGeneric<AddType<A, B>> operator+(const MatrixGeneric<A> &a,
                                                   const MatrixGeneric<B> &b);
 
+    /**
+     * \brief Разность двух матриц
+     * \details Вычитает одну матрицу из другой
+     *
+     * Временная сложность: O(n), где n - количество элементов в матрице.
+     *
+     * \note Тип вычисляется подобно тому, как и при \ref operator+() "сложении"
+     * матриц. То есть, есть возможность вычитать матрицы разных типов.
+     *
+     * \tparam A Тип элеметов первой матрицы
+     * \tparam B Тип элементов второй матрицы
+     * \param a Первая матрицa
+     * \param b Вторая матрица
+     *
+     * \return Разность матриц
+     * \exception matrix_bad_operation Если размеры матриц не совпадают
+     * \sa operator+()
+     */
     template <typename A, typename B>
     friend MatrixGeneric<SubsType<A, B>> operator-(const MatrixGeneric<A> &a,
                                                    const MatrixGeneric<B> &b);
 
+    /**
+     * \brief Произведение двух матриц
+     * \details Умножает одну матрицу на другую, используя определение умножения
+     * матриц.
+     *
+     * Временная сложность: O(n^3), где n - длина стороны матрицы.
+     *
+     * \note Тип вычисляется подобно тому, как и при \ref operator+() "сложении"
+     * матриц. То есть, есть возможность вычитать матрицы разных типов.
+     * Конкретнее, тип элементов возвращаемой матрицы вычисляется как тип
+     * выражения 'a.get(0,0) * b.get(0,0) + a.get(0,0) * b.get(0,0)`
+     *
+     * \tparam A Тип элеметов первой матрицы
+     * \tparam B Тип элементов второй матрицы
+     * \param a Первая матрицa
+     * \param b Вторая матрица
+     *
+     * \return Сумма матриц
+     * \exception matrix_bad_operation Если размеры матриц не позволяют произвести
+     * умножение
+     * \sa operator+()
+     */
     template <typename A, typename B>
     friend MatrixGeneric<AddType<MulType<A, B>, MulType<A, B>>>
     operator*(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
 
+    /**
+     * \brief Произведение матрицы на скаляр 
+     * \details Умножает матрицу на скаляр 
+     *
+     * Временная сложность: O(n), где n - длина стороны матрицы.
+     *
+     * \note
+     * - Тип вычисляется подобно тому, как и при \ref operator+() "сложении"
+     * матриц
+     * - Число должно идти первым. Выражение вида `MatrixGeneric<int>::eye(3) *
+     * 2` не скомпилируется
+     *
+     * \tparam G Тип элеметов матрицы
+     * \tparam Scalar Тип скаляра 
+     * \param scalar Скаляр, на который умножается матрица 
+     * \param a Mатрица
+     *
+     * \return Матрица, умноженная на скаляр
+     * \sa operator+()
+     */
     template <typename G, typename Scalar>
     friend MatrixGeneric<MulType<Scalar, G>>
     operator*(Scalar scalar, const MatrixGeneric<G> &a);
 
+    /**
+     * \brief Делит матрицу на другую
+     * \details Делит первую матрицу на вторую. По определению, деление на
+     * матрицу означает умножение на обратную, так что матрицы должны быть
+     * квадратными, а делитель, к тому же, иметь ненулевой определитель
+     *
+     * Временная сложность: O(n^4), где n - длина стороны матрицы
+     *
+     * \note Тип элементов возвращаемой матрицы вычисляется подобно тому, как он
+     * вычисляется при \ref operator+() "сложении" матриц. Однако, данный тип
+     * вычисляется из выражения вида `a.get(0, 0) * (b.get(0, 0) / 1.0f)`.
+     * Причина этому кроется в том, что результат деления двух целочисленных
+     * матриц, например, будет матрица типа float - деление не замкнуто в целых
+     * числах, поэтому мы сначала пытаемся поделить на float. С другой стороны,
+     * это не будет работать, если элементы матрицы из какого-нибудь конечного
+     * поля. Поэтому в будущем будет добавлена generic-версия деления (см. todo)
+     *
+     * \todo Добавить generic-версию деления, где пользователь может сам
+     * выбрать, к какому типу будет приводиться результат деления
+     *
+     * \tparam A Тип элементов первой матрицы
+     * \tparam B Тип элементов второй матрицы
+     * \param a Матрица-делимое
+     * \param b Матрица-делитель
+     * \return Частное деления матрицы **a** на матрицу **b**
+     *
+     * \exception matrix_bad_operation Если делитель не квадратный
+     * \exception <any> Выбрасывает то же самое, что и operator*(),
+     * MatrixGeneric<T>::inverse()
+     *
+     * \sa operator+()
+     * \sa operator*()
+     * \sa MatrixGeneric<T>::inverse()
+     */
     template <typename A, typename B>
     friend MatrixGeneric<MulType<A, DivType<B, float>>>
     operator/(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
 
+    /**
+     * \brief Сравнение матриц
+     * \details Определяет, равны ли две матрицы согласно математическому
+     * определению
+     *
+     * \tparam A Тип элементов первой матрицы
+     * \tparam B Тип элементов второй матрицы
+     * \param a Первая матрица 
+     * \param b Вторая матрица 
+     * \return Равны ли две матрицы 
+     */
     template <typename A, typename B>
-    friend bool operator==(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
+    friend bool operator==(const MatrixGeneric<A> &a,
+                           const MatrixGeneric<B> &b);
 
+    /**
+     * \brief Сравнение матриц
+     * \details Определяет, не равны ли две матрицы согласно математическому
+     * определению. Фактически, функция - отрицание \ref operator==()
+     * "равенства" двух матриц
+     *
+     * \tparam A Тип элементов первой матрицы
+     * \tparam B Тип элементов второй матрицы
+     * \param a Первая матрица
+     * \param b Вторая матрица
+     * \return Равны ли две матрицы
+     * \sa operator==()
+     */
     template <typename A, typename B>
-    friend bool operator!=(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
+    friend bool operator!=(const MatrixGeneric<A> &a,
+                           const MatrixGeneric<B> &b);
 
     /**
      * \brief Вычисление определителя матрицы
