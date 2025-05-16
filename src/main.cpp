@@ -34,7 +34,7 @@
  *
  * Утилита исполняется следующим образом:
  * ```
- * ./calc [файл с информацией] [-f|-d]
+ * tspp_calc [файл с информацией] [-f|-d]
  * ```
  *
  * Флаги `-f`, `-d` указывают на тип элементов матриц: -f - float, -d - double.
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 {
     if (argc < 3)
     {
-        std::cout << "[calc] usage: calc [file] [-f|-d]" << std::endl;
+        std::cout << "[tspp_calc] usage: tspp_calc [file] [-f|-d]" << std::endl;
         return -1;
     }
 

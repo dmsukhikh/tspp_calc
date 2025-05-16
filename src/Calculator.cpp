@@ -23,4 +23,3 @@ template <> long long _conversionFromString(std::string &i)
 {
     return std::stoll(i);
 }
-

@@ -1,17 +1,17 @@
 #ifndef __MATRIX_GENERIC
 #define __MATRIX_GENERIC
 
+#include "Exceptions.hpp"
+#include "MatrixOperation.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <initializer_list>
-#include <algorithm>
 #include <utility>
 #include <vector>
-#include "MatrixOperation.hpp"
-#include "Exceptions.hpp"
 
 /**
  * \file MatrixGeneric.hpp
- * Файл, содержащий класс MatrixGeneric 
+ * Файл, содержащий класс MatrixGeneric
  * \author dmsukhikh
  */
 
@@ -76,16 +76,17 @@ template <typename T> class MatrixGeneric
     MatrixGeneric(const std::initializer_list<std::initializer_list<T>> &nums)
     {
         if (nums.size() == 0)
-            return ;
+            return;
 
         auto width = nums.begin()->size();
         auto height = nums.size();
-        auto isValidList = std::all_of(nums.begin(), nums.end(),
-                                       [width](const std::initializer_list<T> &raw)
-                                       { return raw.size() == width; });
+        auto isValidList =
+            std::all_of(nums.begin(), nums.end(),
+                        [width](const std::initializer_list<T> &raw)
+                        { return raw.size() == width; });
         if (!isValidList)
             throw matrix_initialization_error("Invalid initializer list");
-        
+
         _width = width;
         _height = height;
 
@@ -94,10 +95,10 @@ template <typename T> class MatrixGeneric
             throw matrix_initialization_error(
                 "Only both height and width can be zero");
         }
-        
-        for (auto &raw: nums)
+
+        for (auto &raw : nums)
         {
-            for (auto &i: raw)
+            for (auto &i : raw)
             {
                 _data.push_back(i);
             }
@@ -124,12 +125,9 @@ template <typename T> class MatrixGeneric
         return out;
     }
 
-    MatrixGeneric(MatrixGeneric &&other)
-    {
-        *this = std::move(other);
-    };
+    MatrixGeneric(MatrixGeneric &&other) { *this = std::move(other); };
 
-    MatrixGeneric &operator=(MatrixGeneric &&other) 
+    MatrixGeneric &operator=(MatrixGeneric &&other)
     {
         if (&other != this)
         {
@@ -147,16 +145,16 @@ template <typename T> class MatrixGeneric
     /**
      * \copydoc get()
      */
-    T& get(uint32_t x, uint32_t y)
+    T &get(uint32_t x, uint32_t y)
     {
-        return const_cast<T&>(
-            const_cast<const MatrixGeneric<T> *>(this)->get(x, y)
-                );
+        return const_cast<T &>(
+            const_cast<const MatrixGeneric<T> *>(this)->get(x, y));
     }
 
     /**
      * \brief Получение элемента
-     * \details Получение элемента матрицы, находящийся в строке **x** и столбце **y**
+     * \details Получение элемента матрицы, находящийся в строке **x** и столбце
+     * **y**
      * \note Нумерация строк и столбцов начинается с нуля
      *
      * \param x Строка элемента
@@ -164,7 +162,7 @@ template <typename T> class MatrixGeneric
      * \return lvalue-ссылка на элемент матрицы
      * \throw matrix_bad_access Если взятие элемента выходит за пределы матрицы
      */
-    const T& get(uint32_t x, uint32_t y) const
+    const T &get(uint32_t x, uint32_t y) const
     {
         auto idx = x * _width + y;
         if (idx >= _width * _height)
@@ -172,26 +170,20 @@ template <typename T> class MatrixGeneric
             throw matrix_bad_access("Indexing is out of range");
         }
 
-        return _data[x*_width + y];
+        return _data[x * _width + y];
     }
 
     /**
      * \brief Получение высоты матрицы
      * \return Высота матрицы
      */
-    uint32_t height() const noexcept
-    {
-        return _height;
-    }
+    uint32_t height() const noexcept { return _height; }
 
     /**
      * \brief Получение ширины матрицы
      * \return Ширина матрицы
      */
-    uint32_t width() const noexcept
-    {
-        return _width;
-    }
+    uint32_t width() const noexcept { return _width; }
 
     /**
      * \brief Сложение двух матриц
@@ -257,8 +249,8 @@ template <typename T> class MatrixGeneric
      * \param b Вторая матрица
      *
      * \return Сумма матриц
-     * \exception matrix_bad_operation Если размеры матриц не позволяют произвести
-     * умножение
+     * \exception matrix_bad_operation Если размеры матриц не позволяют
+     * произвести умножение
      * \sa operator+()
      */
     template <typename A, typename B>
@@ -266,8 +258,8 @@ template <typename T> class MatrixGeneric
     operator*(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
 
     /**
-     * \brief Произведение матрицы на скаляр 
-     * \details Умножает матрицу на скаляр 
+     * \brief Произведение матрицы на скаляр
+     * \details Умножает матрицу на скаляр
      *
      * Временная сложность: O(n), где n - длина стороны матрицы.
      *
@@ -278,8 +270,8 @@ template <typename T> class MatrixGeneric
      * 2` не скомпилируется
      *
      * \tparam G Тип элеметов матрицы
-     * \tparam Scalar Тип скаляра 
-     * \param scalar Скаляр, на который умножается матрица 
+     * \tparam Scalar Тип скаляра
+     * \param scalar Скаляр, на который умножается матрица
      * \param a Mатрица
      *
      * \return Матрица, умноженная на скаляр
@@ -334,9 +326,9 @@ template <typename T> class MatrixGeneric
      *
      * \tparam A Тип элементов первой матрицы
      * \tparam B Тип элементов второй матрицы
-     * \param a Первая матрица 
-     * \param b Вторая матрица 
-     * \return Равны ли две матрицы 
+     * \param a Первая матрица
+     * \param b Вторая матрица
+     * \return Равны ли две матрицы
      */
     template <typename A, typename B>
     friend bool operator==(const MatrixGeneric<A> &a,
@@ -380,12 +372,12 @@ template <typename T> class MatrixGeneric
     T det() const
     {
         if (_height != _width)
-            throw matrix_bad_det("Matrix isn't square"); 
+            throw matrix_bad_det("Matrix isn't square");
 
         if (_height == 0 && _width == 0)
-            return 1; 
+            return 1;
 
-        return _gauss().second;    
+        return _gauss().second;
     }
 
     /**
@@ -404,7 +396,7 @@ template <typename T> class MatrixGeneric
         {
             for (uint32_t j = 0; j < _width; ++j)
             {
-                _new_data[j*_height + i] = _data[i*_width + j];
+                _new_data[j * _height + i] = _data[i * _width + j];
             }
         }
 
@@ -441,7 +433,7 @@ template <typename T> class MatrixGeneric
 
         auto delta = det();
         if (delta == 0)
-            throw matrix_bad_inverse("Matrix determinant equals zero"); 
+            throw matrix_bad_inverse("Matrix determinant equals zero");
 
         for (uint32_t i = 0; i < _height; ++i)
         {
@@ -496,10 +488,7 @@ template <typename T> class MatrixGeneric
      * \return Ранг матрицы
      * \sa det()
      */
-    uint32_t rk() const
-    {
-        return _gauss().first;
-    }
+    uint32_t rk() const { return _gauss().first; }
 
   private:
     uint32_t _height{0}, ///< Высота матрицы
@@ -530,7 +519,7 @@ template <typename T> class MatrixGeneric
         MatrixGeneric out = *this;
 
         auto cnt = 0;
-        auto deleter = [&cnt, i, j, this](const T&)
+        auto deleter = [&cnt, i, j, this](const T &)
         {
             auto pred = cnt / _width == i || cnt % _width == j;
             ++cnt;
@@ -562,7 +551,7 @@ template <typename T> class MatrixGeneric
         MatrixGeneric<DivType<float, T>> _copy(_height, _width);
         for (uint32_t i = 0; i < _width * _height; ++i)
         {
-            _copy.get(i/_width, i%_width) = _data[i];
+            _copy.get(i / _width, i % _width) = _data[i];
         }
         uint32_t rank = std::min(_height, _width);
 
@@ -604,20 +593,20 @@ template <typename T> class MatrixGeneric
                 {
                     rank--;
                     sign = 0;
-                    for (uint32_t i = 0; i < _height; i ++)
+                    for (uint32_t i = 0; i < _height; i++)
                         _copy.get(i, row) = _copy.get(i, rank);
                 }
                 row--;
             }
         }
-        
+
         T absdet = (_width == 0 && _height == 0) ? 0 : 1;
         for (uint32_t i = 0; i < std::min(_width, _height); ++i)
         {
             absdet *= _copy.get(i, i);
         }
 
-        return {rank, absdet*sign};
+        return {rank, absdet * sign};
     }
 };
 

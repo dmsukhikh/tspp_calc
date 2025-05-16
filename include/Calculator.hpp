@@ -7,9 +7,9 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <stdexcept>
 
 /**
  * \file Calculator.hpp
@@ -37,7 +37,7 @@
  */
 template <typename T> T _conversionFromString(std::string &i) { return T(i); }
 
-template <> int _conversionFromString(std::string &i); 
+template <> int _conversionFromString(std::string &i);
 
 template <> float _conversionFromString(std::string &i);
 
@@ -145,8 +145,9 @@ template <typename Type> class Calculator
         std::ifstream matrixData(argv[1]);
         if (!matrixData.is_open())
         {
-            std::cout << "[calc] error: invalid file. See README.md for info"
-                      << std::endl;
+            std::cout
+                << "[tspp_calc] error: invalid file. See README.md for info"
+                << std::endl;
             throw std::exception();
         }
 
@@ -160,8 +161,9 @@ template <typename Type> class Calculator
 
             if (commands.count(opArgs[0]) == 0)
             {
-                std::cout << "[calc] error: invalid operation \"" << opArgs[0]
-                          << "\".  See README.md for info" << std::endl;
+                std::cout << "[tspp_calc] error: invalid operation \""
+                          << opArgs[0] << "\".  See README.md for info"
+                          << std::endl;
                 throw std::exception();
             }
             else
@@ -174,11 +176,12 @@ template <typename Type> class Calculator
 
                 if (opArgs.size() - 1 < commandsWithArgs[opArgs[0]])
                 {
-                    std::cout
-                        << "[calc] error: not enough arguments for operation "
-                        << opArgs[0] << ". " << commandsWithArgs[opArgs[0]]
-                        << " expected, but " << opArgs.size() - 1
-                        << " was given." << std::endl;
+                    std::cout << "[tspp_calc] error: not enough arguments for "
+                                 "operation "
+                              << opArgs[0] << ". "
+                              << commandsWithArgs[opArgs[0]]
+                              << " expected, but " << opArgs.size() - 1
+                              << " was given." << std::endl;
                     throw std::exception();
                 }
             }
@@ -208,7 +211,7 @@ template <typename Type> class Calculator
         }
         catch (std::exception &e)
         {
-            std::cout << "[calc] error: " << e.what() << std::endl;
+            std::cout << "[tspp_calc] error: " << e.what() << std::endl;
             throw e;
         }
     }
@@ -240,7 +243,8 @@ template <typename T> void mainRoutine(char **argv)
     }
     catch (basic_matrix_exception &e)
     {
-        std::cout << "[calc] error while computing: " << e.what() << std::endl;
+        std::cout << "[tspp_calc] error while computing: " << e.what()
+                  << std::endl;
         throw e;
     }
 
