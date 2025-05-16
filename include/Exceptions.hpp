@@ -4,6 +4,12 @@
 #include <exception>
 #include <string>
 
+/**
+ * \file Exceptions.hpp
+ * Файл, содержащий исключения, связанные с работой матриц
+ * \author dmsukhikh
+ */
+
 class basic_matrix_exception : public std::exception
 {
     std::string _msg;

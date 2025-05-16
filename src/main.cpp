@@ -1,5 +1,10 @@
-#include "MatrixGeneric.hpp"
 #include <Calculator.hpp>
+
+/**
+ * \file main.cpp
+ * Исполняемый файл утилиты
+ * \author dmsukhikh
+ */
 
 int main(int argc, char** argv)
 {

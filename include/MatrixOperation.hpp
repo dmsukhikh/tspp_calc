@@ -5,6 +5,12 @@
 #include <string>
 #include "Exceptions.hpp"
 
+/** \file MatrixOperation.hpp
+ *  Файл содержащий арифметические операции над матрицами и некоторые type
+ * aliases
+ *  \author dmsukhikh
+ */
+
 // forward declaration
 template <typename T> class MatrixGeneric;
 

@@ -9,6 +9,12 @@
 #include "MatrixOperation.hpp"
 #include "Exceptions.hpp"
 
+/**
+ * \file MatrixGeneric.hpp
+ * Файл, содержащий класс MatrixGeneric 
+ * \author dmsukhikh
+ */
+
 /** \brief Класс, представляющий матрицу
  *  \details Класс, представляющий прямоугольную матрицу и реализующий основные
  * математические операции над ними.

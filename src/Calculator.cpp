@@ -1,5 +1,12 @@
 #include <Calculator.hpp>
 
+/**
+ * \file Calculator.cpp
+ * Файл содержит специализации _conversionFromString для некоторых встроенных
+ * типов. Конструктор типа Т заменен в них на функции вида std::stoi()
+ * \author dmsukhikh
+ */
+
 template <> int _conversionFromString<int>(std::string &i)
 {
     return std::stoi(i);
