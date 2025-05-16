@@ -192,11 +192,12 @@ template <typename Type> class Calculator
             // Парсинг матриц
             for (size_t idx = 0; idx < commands[opArgs[0]].operands; ++idx)
             {
-                matrices.emplace_back(
-                    static_cast<uint64_t>(getFromStream<int>(
-                        matrixData, "error in getting width")),
-                    static_cast<uint64_t>(getFromStream<int>(
-                        matrixData, "error in getting height")));
+                auto height = static_cast<uint32_t>(
+                    getFromStream<int>(matrixData, "error in getting height"));
+                auto width = static_cast<uint32_t>(
+                    getFromStream<int>(matrixData, "error in getting width"));
+
+                matrices.emplace_back(height, width);
 
                 for (uint32_t i = 0; i < matrices[idx].height(); ++i)
                 {
