@@ -138,6 +138,8 @@ package-test-ubuntu-job:
     - dpkg -L calculator || echo "Файлы не найдены"
   dependencies:
     - package-ubuntu-job
+  tags:
+    - ubuntu
 
 package-test-centos-job:
   extends:
@@ -150,6 +152,8 @@ package-test-centos-job:
     - rpm -ql calculator || echo "Файлы не найдены"
   dependencies:
     - package-centos-job
+  tags:
+    - centos
 
 
 
