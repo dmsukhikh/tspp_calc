@@ -133,9 +133,9 @@ package-test-ubuntu-job:
     #установка пакета
     - dpkg -i pkg-ubuntu/*.deb || true
     #проверка установки
-    - dpkg-deb -c package-ubuntu/calculator-1.0.0-Linux.deb
-    - dpkg -l | grep calculator || echo "Пакет не найден"
-    - dpkg -L calculator || echo "Файлы не найдены"
+    - dpkg-deb -c pkg-ubuntu/tspp_calc-1.1-Linux.deb
+    - dpkg -l | grep tspp_calc || echo "Пакет не найден"
+    - dpkg -L tspp_calc || echo "Файлы не найдены"
 
   needs:
     - job: package-ubuntu-job
@@ -149,10 +149,10 @@ package-test-centos-job:
     .standart_package_test
   before_script:
     # установка пакета
-    - rpm -i package-centos/*.rpm || true
+    - rpm -i pkg-centos/*.rpm || true
     # проверка установки
-    - rpm -q calculator || echo "Пакет не найден"
-    - rpm -ql calculator || echo "Файлы не найдены"
+    - rpm -q tspp_calc || echo "Пакет не найден"
+    - rpm -ql tspp_calc || echo "Файлы не найдены"
 
   needs:
     - job: package-centos-job
