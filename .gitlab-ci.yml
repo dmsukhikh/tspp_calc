@@ -89,6 +89,10 @@ package-ubuntu-job:
     - mv *.deb ../pkg-ubuntu/
   needs:
     - job: test-ubuntu-job
+    - job: build-ubuntu-job
+  dependencies:
+    - build-ubuntu-job
+
   artifacts:
     paths:
       - pkg-ubuntu/
@@ -105,6 +109,10 @@ package-centos-job:
     - mv *.rpm ../pkg-centos/
   needs:
     - job: test-centos-job
+    - job: build-centos-job
+  dependencies:
+    - build-centos-job
+
   artifacts:
     paths:
       - pkg-centos/
