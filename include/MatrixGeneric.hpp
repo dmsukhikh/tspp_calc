@@ -51,6 +51,22 @@ template <typename T> class MatrixGeneric
     MatrixGeneric(const MatrixGeneric &) = default;
     MatrixGeneric &operator=(const MatrixGeneric &) = default;
 
+    /**
+     * \brief Конструктор матрицы из initializer_list
+     * \details Конструктор создает матрицу из списка списков инициализации.
+     * Пример использования:
+     * \code
+     * MatrixGeneric<int> m = {{1, 2, 3},
+     *                         {4, 5, 6},
+     *                         {7, 8, 9}};
+     * \endcode
+     *
+     * \param nums Список списков инициализации
+     * \exception matrix_initialization_error Выбрасывается в двух случаях:
+     *  - Список некорректный: все списки должны быть одинаковой длины
+     *  - Ширина нулевая, а высота - нет, и наоборот. Так, нельзя создать
+     * матрицу 0x10 или 2x0.
+     */
     MatrixGeneric(const std::initializer_list<std::initializer_list<T>> &nums)
     {
         if (nums.size() == 0)
@@ -82,6 +98,16 @@ template <typename T> class MatrixGeneric
         }
     }
 
+    /**
+     * \brief Создание единичной матрицы
+     * \details Функция создает квадратную матрицу со стороной **size**, где на
+     * главной диагонали находятся единицы.
+     * \note Для использования этой функции тип **T** должен иметь конструктор
+     * `T::T(int)`.
+     *
+     * \param size Длина стороны матрицы
+     * \return Единичная матрицы
+     */
     static MatrixGeneric eye(uint32_t size)
     {
         MatrixGeneric<T> out(size, size);
@@ -112,6 +138,9 @@ template <typename T> class MatrixGeneric
 
     ~MatrixGeneric() = default;
 
+    /**
+     * \copydoc get()
+     */
     T& get(uint32_t x, uint32_t y)
     {
         return const_cast<T&>(
@@ -119,6 +148,16 @@ template <typename T> class MatrixGeneric
                 );
     }
 
+    /**
+     * \brief Получение элемента
+     * \details Получение элемента матрицы, находящийся в строке **x** и столбце **y**
+     * \note Нумерация строк и столбцов начинается с нуля
+     *
+     * \param x Строка элемента
+     * \param y Столбец элемента
+     * \return lvalue-ссылка на элемент матрицы
+     * \throw matrix_bad_access Если взятие элемента выходит за пределы матрицы
+     */
     const T& get(uint32_t x, uint32_t y) const
     {
         auto idx = x * _width + y;
@@ -130,11 +169,19 @@ template <typename T> class MatrixGeneric
         return _data[x*_width + y];
     }
 
+    /**
+     * \brief Получение высоты матрицы
+     * \return Высота матрицы
+     */
     uint32_t height() const noexcept
     {
         return _height;
     }
 
+    /**
+     * \brief Получение ширины матрицы
+     * \return Ширина матрицы
+     */
     uint32_t width() const noexcept
     {
         return _width;
@@ -166,6 +213,24 @@ template <typename T> class MatrixGeneric
     template <typename A, typename B>
     friend bool operator!=(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b);
 
+    /**
+     * \brief Вычисление определителя матрицы
+     * \details Метод вычисляет определитель матрицы, используя метод Гаусса
+     * сведения матрицы к вернетреугольному виду.
+     *
+     * Временная сложность алгоритма: O(n^3), где n - длина стороны матрицы
+     * \note
+     * - Для использования данной функции тип T должен быть арифметическим, то
+     * есть поддерживать арифметические операции. Также, тип T должен
+     * приводиться к типу float, даже несмотря на то, что возвращаемый тип - T.
+     * - Для пустой матрицы определитель принимается равным единице
+     *
+     * \todo Планируется сделать дополнительную перегрузку det, которая не
+     * зависит от приведения к float
+     *
+     * \return Определитель матрицы
+     * \throw matrix_bad_det Если матрица не квадратная
+     */
     T det() const
     {
         if (_height != _width)
@@ -177,7 +242,15 @@ template <typename T> class MatrixGeneric
         return _gauss().second;    
     }
 
-
+    /**
+     * \brief Транспонирование матрицы
+     * \details Метод вычисляет новую матрицу, транспонируя исходную, и
+     * возвращает транспонированную копию. Исходная матрица **не меняется**.
+     *
+     * Временная сложность алгоритма: O(n), где n - количество элементов
+     *
+     * \return Транспонированная матрица
+     */
     MatrixGeneric transpose() const
     {
         std::vector<T> _new_data(_width * _height);
@@ -194,6 +267,25 @@ template <typename T> class MatrixGeneric
         return out;
     }
 
+    /**
+     * \brief Обращение матрицы
+     * \details Метод вычисляет матрицу, обратную исходной, используя метод
+     * алгебраических дополнений.
+     *
+     * Временная сложность алгоритма: O(n^4), где n - длина стороны матрицы
+     *
+     * \note Для использования данной функции тип T должен быть арифметическим,
+     * то есть поддерживать арифметические операции. Также, тип T должен
+     * приводиться к типу float
+     *
+     * \todo Планируется сделать дополнительную перегрузку inverse, которая не
+     * зависит от приведения к float
+     *
+     * \return Матрица, обратная данной
+     * \throw matrix_bad_inverse Если матрица не квадратная
+     * \throw matrix_bad_inverse Если определитель матрицы равен нулю. В таком
+     * случае, обратной матрицы к данной не существует
+     * */
     MatrixGeneric<DivType<T, float>> inverse() const
     {
         if (_height != _width)
@@ -217,6 +309,17 @@ template <typename T> class MatrixGeneric
         return out;
     }
 
+    /**
+     * \brief Возведение матрицы в степень
+     * \details Возвращает исходную матрицу, возведенную в степень **pow**. При
+     * вычислении степени используется линейное перемножение матриц.
+     *
+     * Временная сложность: O(n^3 * pow), где n - длина стороны матрицы
+     *
+     * \param power Степень, в которую необходимо возвести матрицу
+     * \return Исходная матрица в степени **power**
+     * \exception matrix_bad_pow Если матрица не квадратная
+     */
     MatrixGeneric pow(uint32_t power)
     {
         if (_height != _width)
@@ -235,15 +338,42 @@ template <typename T> class MatrixGeneric
         return out;
     }
 
+    /**
+     * \brief Вычисление ранга матрицы
+     * \details Вычисление ранга матрицы методом Гаусса.
+     *
+     * Временная сложность: О(n^3), где n - длина стороны матрицы.
+     *
+     * \note Поскольку при вычислении ранга используется метод Гаусса, в силе
+     * все ограничения, накладываемые на метод \ref det()
+     *
+     * \return Ранг матрицы
+     * \sa det()
+     */
     uint32_t rk() const
     {
         return _gauss().first;
     }
 
   private:
-    uint32_t _height{0}, _width{0};
-    std::vector<T> _data;
+    uint32_t _height{0}, ///< Высота матрицы
+        _width{0};       ///< Ширина матрицы
 
+    std::vector<T> _data; ///< Элементы матрицы, хранятся в одномерном массиве
+
+    /**
+     * \brief Вычисление алгебраического дополнения матрицы
+     * \details Вычисляет алгебраическое дополнение, удаляя i-тую строку и j-тый
+     * столбец
+     *
+     * Временная сложность - O(n), где n - количество элементов
+     *
+     * \param i строка, которую нужно удалить
+     * \param j столбец, который нужно удалить
+     * \return Алгебраическое дополнение
+     * \throw matrix_bad_access Если удаляемая строка или столбец выходит за
+     * пределы матрицы
+     */
     MatrixGeneric _cofactor(uint32_t i, uint32_t j) const
     {
         if (i >= _height)
@@ -270,6 +400,12 @@ template <typename T> class MatrixGeneric
         return out;
     }
 
+    /**
+     * \brief Метод Гаусса
+     * \details Метод Гаусса =). Вычисляет одновременно и определитель, и ранг.
+     * \todo Сделать кэширование для метода Гаусса
+     * \return `std::pair`. В first лежит ранг, в second - определитель
+     */
     std::pair<uint32_t, T> _gauss() const
     {
         // Метод Гаусса приведения матрицы к верхнетреугольному виду. 1 - ранг,
