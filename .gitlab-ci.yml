@@ -136,6 +136,9 @@ package-test-ubuntu-job:
     - dpkg-deb -c package-ubuntu/calculator-1.0.0-Linux.deb
     - dpkg -l | grep calculator || echo "Пакет не найден"
     - dpkg -L calculator || echo "Файлы не найдены"
+
+  needs:
+    - job: package-ubuntu-job
   dependencies:
     - package-ubuntu-job
   tags:
@@ -150,6 +153,9 @@ package-test-centos-job:
     # проверка установки
     - rpm -q calculator || echo "Пакет не найден"
     - rpm -ql calculator || echo "Файлы не найдены"
+
+  needs:
+    - job: package-centos-job
   dependencies:
     - package-centos-job
   tags:
