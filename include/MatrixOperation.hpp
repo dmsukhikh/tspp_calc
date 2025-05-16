@@ -1,9 +1,15 @@
 #ifndef __MATRIX_OPS
 #define __MATRIX_OPS
 
+#include "Exceptions.hpp"
 #include <cstdint>
 #include <string>
-#include "Exceptions.hpp"
+
+/** \file MatrixOperation.hpp
+ *  Файл содержащий арифметические операции над матрицами и некоторые type
+ * aliases
+ *  \author dmsukhikh
+ */
 
 // forward declaration
 template <typename T> class MatrixGeneric;
@@ -38,7 +44,7 @@ MatrixGeneric<AddType<First, Second>> operator+(const MatrixGeneric<First> &a,
     RetType out(a.height(), a.width());
     for (uint32_t i = 0; i < out.height() * out.width(); ++i)
     {
-        out._data[i] = a._data[i] + b._data[i]; 
+        out._data[i] = a._data[i] + b._data[i];
     }
 
     return out;
@@ -50,16 +56,17 @@ MatrixGeneric<MulType<Scalar, G>> operator*(Scalar s, const MatrixGeneric<G> &a)
     MatrixGeneric<MulType<Scalar, G>> out(a.height(), a.width());
     for (uint32_t i = 0; i < out.height() * out.width(); ++i)
     {
-        out._data[i] = a._data[i] * s; 
+        out._data[i] = a._data[i] * s;
     }
     return out;
 }
 
-template<typename A, typename B>
-MatrixGeneric<SubsType<A, B>> operator-(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
+template <typename A, typename B>
+MatrixGeneric<SubsType<A, B>> operator-(const MatrixGeneric<A> &a,
+                                        const MatrixGeneric<B> &b)
 {
-    // Код дублируется, потому что a + ((-1) * b) может привести к 
-    // неправильному выводу типа: скажем a, b хранят тип short. Тогда в 
+    // Код дублируется, потому что a + ((-1) * b) может привести к
+    // неправильному выводу типа: скажем a, b хранят тип short. Тогда в
     // результате мы получим тип int, потому что -1 типа int. static_cast в
     // теории может не сработать.
     // Возможно, стоит добавить generic функцию, принимающую std::function?
@@ -78,7 +85,7 @@ MatrixGeneric<SubsType<A, B>> operator-(const MatrixGeneric<A> &a, const MatrixG
     RetType out(a.height(), a.width());
     for (uint32_t i = 0; i < out.height() * out.width(); ++i)
     {
-        out._data[i] = a._data[i] - b._data[i]; 
+        out._data[i] = a._data[i] - b._data[i];
     }
 
     return out;
@@ -108,7 +115,7 @@ operator*(const MatrixGeneric<A> &a, const MatrixGeneric<B> &b)
             RetType sm = 0;
             for (uint32_t k = 0; k < a.width(); ++k)
             {
-                sm += a.get(i, k) * b.get(k, j); 
+                sm += a.get(i, k) * b.get(k, j);
             }
             out.get(i, j) = sm;
         }
