@@ -1,10 +1,22 @@
 cmake_minimum_required(VERSION 3.5)
-project('tspp_calc')
+project("tspp_calc")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # for language server support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# cpack options
+set(CPACK_PACKAGE_NAME "tspp_calc")
+set(CPACK_PACKAGE_DESCRIPTION "Matrix library and utility for matrix calculations")
+set(CPACK_PACKAGE_VERSION "1.1")
+set(CPACK_GENERATOR "DEB;RPM;TZST")
+set(CPACK_PACKAGE_LICENSE "LGPL")
+
+set(CPACK_PACKAGE_CONTACT "dimasssuchich@mail.ru")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Sukhikh Dmitriy")
+
+include (CPack)
 
 if (NOT DEFINED TESTS)
     set(TESTS true)
