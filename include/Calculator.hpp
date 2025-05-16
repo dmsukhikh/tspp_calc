@@ -11,6 +11,12 @@
 #include <unordered_map>
 #include <stdexcept>
 
+/**
+ * \file Calculator.hpp
+ * Файл, содержащий класс Calculator и некоторые вспомогательные функции
+ * \author dmsukhikh
+ */
+
 /*
  * Формат файла с матрицами:
  * [Операция] [Аргументы операции]
@@ -22,13 +28,39 @@
  * ... сколько нужно матриц для операции ...
  */
 
+/**
+ * \brief Преобразование строки в объект типа **T**
+ * \details Вспомогательная функция, которая используется в getFromStream
+ * \param i Строка, из которой необходимо получить объект типа **T**
+ * \return Выражение вида `T(i)`
+ * \sa getFromStream()
+ */
 template <typename T> T _conversionFromString(std::string &i) { return T(i); }
-template <> int _conversionFromString<int>(std::string &i);
-template <> float _conversionFromString<float>(std::string &i);
-template <> double _conversionFromString<double>(std::string &i);
+
+template <> int _conversionFromString(std::string &i); 
+
+template <> float _conversionFromString(std::string &i);
+
+template <> double _conversionFromString(std::string &i);
+
 template <> long long _conversionFromString(std::string &i);
 
-// Получить следующий элемент типа T из потока
+/**
+ * \brief Безопасное получение следующего объекта из потока
+ * \details Извлекает из потока **stream** следующий объект типа **T**. В случае
+ * ошибки преобразования типа выбрасывает исключение с сообщением **msg**.
+ *
+ * \note Для произвольного типа данных **T** используется конструктор
+ * `T::T(std::string)`. Для некоторых встроенных типов данных есть спецификации,
+ * использующие функции типа `std::stoi()`.
+ *
+ * \param stream Поток вывода, из которого берется информация
+ * \param msg Сообщение при ошибке
+ * \return Полученный из потока объект
+ * \throw std::runtime_error В случае, если происходит попытка получить объект
+ * из пустого потока или если происходит ошибка при преобразовании строки в
+ * объект типа T
+ * */
 template <typename T>
 T getFromStream(std::basic_istream<char, std::char_traits<char>> &stream,
                 std::string msg)
@@ -49,6 +81,12 @@ T getFromStream(std::basic_istream<char, std::char_traits<char>> &stream,
     }
 }
 
+/**
+ * \brief Класс для работы с выражениями из файла
+ * \details Класс Calculator парсит задаваемый пользователем файл и вычисляет
+ * результат
+ * \tparam Type Тип данных, необходимый пользователю
+ */
 template <typename Type> class Calculator
 {
     struct commandInfo
@@ -56,6 +94,8 @@ template <typename Type> class Calculator
         size_t operands;
         std::function<MatrixGeneric<Type>()> func;
     };
+    ///< Структура, хранящая количество операндов операции и функцию, которую
+    ///< необходимо вызывать
 
     /*
      * Хитрая python-way штука. С каждой коммандой ассоциирована структура.
@@ -86,10 +126,19 @@ template <typename Type> class Calculator
     };
 
     std::unordered_map<std::string, size_t> commandsWithArgs = {{"pow", 1}};
-    std::vector<MatrixGeneric<Type>> matrices;
-    std::vector<std::string> opArgs;
+    ///< Сколько аргументов требует каждая операция
+    std::vector<MatrixGeneric<Type>>
+        matrices;                    ///< Здесь хранятся распарсенные матрицы
+    std::vector<std::string> opArgs; ///< Распарсенные операция и ее аргументы
 
   public:
+    /**
+     * \brief Парсит вводимый файл
+     * \details Получает данные о матрицах и операции над ними из файла
+     * \param argv аргументы командной строки
+     * \throw std::exception Если файл не существует или информация в нем
+     * некорректная
+     */
     Calculator(char **argv) : opArgs(1)
     {
         // Открытие файла
@@ -164,9 +213,22 @@ template <typename Type> class Calculator
         }
     }
 
+    /**
+     * \brief Вычисляет результат операции
+     * \return Результат операции
+     * \throw <Any> Если происходит ошибка в операции
+     */
     MatrixGeneric<Type> getResult() { return commands[opArgs[0]].func(); }
 };
 
+/**
+ * \brief Основная процедура калькулятора
+ * \details Калькулятор принимает аргументы, открывает файл, парсит его и
+ * печатает результат
+ * \param argv аргументы командной строки
+ * \return None
+ * \throw basic_matrix_exception В случае неудачного парсинга файла
+ */
 template <typename T> void mainRoutine(char **argv)
 {
     Calculator<T> a(argv);
