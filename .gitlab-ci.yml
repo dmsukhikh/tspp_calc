@@ -1,13 +1,15 @@
 stages:
   - build
   - test
+  - package
+  - deploy
 
 .standart_build:
   stage: build
   script:
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
     - make
   artifacts:
     paths:
@@ -18,8 +20,15 @@ stages:
   stage: test
   script:
     - cd build
-    - ./tests
-
+    - ./tests --gtest_output=xml:test_results.xml
+    - valgrind ./tests
+    - cppcheck ../src
+  artifacts:
+    paths:
+      - build/test_results.xml
+    reports:
+      junit: build/test_results.xml
+    expire_in: 10 minutes
 
 build-centos-job:
   extends:
@@ -52,4 +61,76 @@ test-ubuntu-job:
     - ubuntu
   needs:
     - job: build-ubuntu-job
+
+doc-job:
+  stage: build
+  script:
+    - apt update
+    - apt install doxygen-latex texlive-lang-cyrillic doxygen -y
+    - doxygen Doxyfile
+    - tar -cf doc/html.tar doc/html
+    - cd doc/latex
+    - make
+    - cd ../../
+  artifacts:
+    paths:
+      - doc/html.tar
+      - doc/latex/refman.pdf
+    expire_in: 10 minutes
+  tags:
+    - ubuntu
+
+package-ubuntu-job:
+  stage: package
+  script:
+    - mkdir -p pkg-ubuntu
+    - cd build
+    - cpack -G DEB
+    - mv *.deb ../pkg-ubuntu/
+  needs:
+    - job: test-ubuntu-job
+  artifacts:
+    paths:
+      - pkg-ubuntu/
+    expire_in: 10 minutes
+  tags:
+    - ubuntu
+
+package-centos-job:
+  stage: package
+  script:
+    - mkdir -p pkg-centos
+    - cd build
+    - cpack -G RPM
+    - mv *.rpm ../pkg-centos/
+  needs:
+    - job: test-centos-job
+  artifacts:
+    paths:
+      - pkg-centos/
+    expire_in: 30 minutes
+  tags:
+    - centos
+
+deploy-job:
+  stage: deploy
+  script:
+    - echo "Upload artifacts"
+  needs:
+    - doc-job
+    - package-ubuntu-job
+    - package-centos-job
+  dependencies:
+    - doc-job
+    - package-ubuntu-job
+    - package-centos-job
+  artifacts:
+    paths:
+      - pkg-centos/
+      - pkg-ubuntu/
+      - doc
+  when: on_success
+  tags:
+    - ubuntu
+
   
