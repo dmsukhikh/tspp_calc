@@ -2,7 +2,13 @@ stages:
   - build
   - test
   - package
+  - package_test
   - deploy
+
+.standart_package_test:
+  stage: package_test
+  script:
+    - tspp_calc test/test_suite/valid.txt -f
 
 .standart_build:
   stage: build
@@ -120,6 +126,33 @@ package-centos-job:
   tags:
     - centos
 
+package-test-ubuntu-job:
+  extends:
+    .standart_package_test
+  before_script:
+    #установка пакета
+    - dpkg -i pkg-ubuntu/*.deb || true
+    #проверка установки
+    - dpkg-deb -c package-ubuntu/calculator-1.0.0-Linux.deb
+    - dpkg -l | grep calculator || echo "Пакет не найден"
+    - dpkg -L calculator || echo "Файлы не найдены"
+  dependencies:
+    - package-ubuntu-job
+
+package-test-centos-job:
+  extends:
+    .standart_package_test
+  before_script:
+    # установка пакета
+    - rpm -i package-centos/*.rpm || true
+    # проверка установки
+    - rpm -q calculator || echo "Пакет не найден"
+    - rpm -ql calculator || echo "Файлы не найдены"
+  dependencies:
+    - package-centos-job
+
+
+
 deploy-job:
   stage: deploy
   script:
@@ -128,6 +161,8 @@ deploy-job:
     - doc-job
     - package-ubuntu-job
     - package-centos-job
+    - package-test-ubuntu-job
+    - package-test-centos-job
   dependencies:
     - doc-job
     - package-ubuntu-job
