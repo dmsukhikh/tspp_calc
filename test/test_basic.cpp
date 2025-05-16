@@ -56,7 +56,7 @@ TEST(TestBasic, WidthHeightConstructorTest)
     // матрица x строк на y столбцов
     // В тесте также проверяются функции MatrixGeneric::width/height
 
-    auto log = [](uint32_t x, uint32_t y, bool _isWidth = true)
+    auto log = [](uint32_t x, uint32_t y, bool _isWidth = true) -> std::string
     {
         std::stringstream format;
         format << "For matrix " << x << "x" << y << " ";
@@ -68,7 +68,7 @@ TEST(TestBasic, WidthHeightConstructorTest)
         {
             format << "height must be == " << x;
         }
-        return std::string(std::istreambuf_iterator(format), {});
+        return std::string(std::istreambuf_iterator<char>(format), {});
     };
 
     MatrixGeneric<int> a(3, 3);
@@ -96,14 +96,14 @@ TEST(TestBasic, EqualOperatorTest)
     // инициализированых по-разному возвращалось true;
 
     MatrixGeneric<int> a(2, 3);
-    MatrixGeneric b = {{0, 0, 0}, {0, 0, 0}};
+    MatrixGeneric<int> b = {{0, 0, 0}, {0, 0, 0}};
     ASSERT_EQ(a, a) << "Matrix must be equal itself";
     ASSERT_EQ(b, b) << "Matrix must be equal itself";
     ASSERT_EQ(a, b) << "Matrices that was initialized with different "
                        "constructors but have the same content must be equal";
     ASSERT_EQ(b, a) << "Equal operator must be commutative";
 
-    b = MatrixGeneric{{0, 1, 0}, {0, 0, 0}};
+    b = MatrixGeneric<int>{{0, 1, 0}, {0, 0, 0}};
     EXPECT_NE(a, b);
     EXPECT_NE(b, a);
 
@@ -121,7 +121,7 @@ TEST(TestBasic, GetTest)
     // Проверка функции MatrixGeneric::get(x, y). При выходе за пределы матрицы,
     // пробрасывается matrix_bad_access
 
-    MatrixGeneric test = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+    MatrixGeneric<int> test = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
                   cop  = {{1, 2, 0}, {4, 5, 6}, {-1, 8, 9}, {10, 11, 12}};
     // Проверка чтения
     for (int i = 0; i < 12; ++i)
@@ -146,7 +146,7 @@ TEST(TestBasic, GetTestConst)
     // Проверка функции const MatrixGeneric::get(x, y). При выходе за пределы
     // матрицы, пробрасывается matrix_bad_access
 
-    const MatrixGeneric test = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+    const MatrixGeneric<int> test = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
                   cop  = {{1, 2, 0}, {4, 5, 6}, {-1, 8, 9}, {10, 11, 12}};
     // Проверка чтения
     for (int i = 0; i < 12; ++i)
@@ -164,12 +164,12 @@ TEST(TestBasic, GetTestConst)
 TEST(TestBasic, CopyTest)
 {
     // Проверка копирования: конструктора и присваивания
-    MatrixGeneric a = {{1, 2, 3}, {4, 5, 6}};
-    MatrixGeneric copy_a = a;
+    MatrixGeneric<int> a = {{1, 2, 3}, {4, 5, 6}};
+    MatrixGeneric<int> copy_a = a;
     EXPECT_EQ(a, copy_a);
     EXPECT_EQ(copy_a, a);
 
-    MatrixGeneric old_a = a;
+    MatrixGeneric<int> old_a = a;
     MatrixGeneric<int> assign_a;
     assign_a = a;
     a = a;
@@ -184,8 +184,8 @@ TEST(TestBasic, CopyTest)
 TEST(TestBasic, MoveTest)
 {
     // Проверка перемещения: конструктора и присваивания
-    MatrixGeneric a = {{1, 2, 3}, {4, 5, 6}}, old_a = a;
-    MatrixGeneric move_a = std::move(a);
+    MatrixGeneric<int> a = {{1, 2, 3}, {4, 5, 6}}, old_a = a;
+    MatrixGeneric<int> move_a = std::move(a);
     MatrixGeneric<int> b(10, 10);
 
     EXPECT_EQ(old_a, move_a);

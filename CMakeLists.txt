@@ -1,23 +1,52 @@
-cmake_minimum_required(VERSION 3.2)
-project('tspp_calc')
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.5)
+project("tspp_calc")
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (NOT DEFINED ${CMAKE_BUILD_TYPE})
-    set(CMAKE_BUILD_TYPE Debug)
+# for language server support
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# cpack options
+set(CPACK_PACKAGE_NAME "tspp_calc")
+set(CPACK_PACKAGE_DESCRIPTION "Matrix library and utility for matrix calculations")
+set(CPACK_PACKAGE_VERSION "1.1")
+set(CPACK_GENERATOR "DEB;RPM;TZST")
+set(CPACK_PACKAGE_LICENSE "LGPL")
+
+set(CPACK_PACKAGE_CONTACT "dimasssuchich@mail.ru")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Sukhikh Dmitriy")
+
+include (CPack)
+
+if (NOT DEFINED TESTS)
+    set(TESTS true)
 endif()
 
-if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
-    # for language server support
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-    set(COMPILE_FLAGS -Wall -Wextra -Wpedantic 
-    -std=c++17 -g -fsanitize=address -fsanitize=leak)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Debug" FORCE)
+endif()
 
+add_library(build_features INTERFACE)
+target_include_directories(build_features INTERFACE include)
+
+# Исполняемый файл утилиты
+add_executable(tspp_calc ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_library(calc_ins ${CMAKE_SOURCE_DIR}/src/Calculator.cpp)
+target_link_libraries(calc_ins PUBLIC build_features)
+target_link_libraries(tspp_calc PRIVATE calc_ins)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    set(COMPILE_FLAGS -Wall -Wextra -Wpedantic 
+    -std=c++14 -g -fsanitize=address -fsanitize=leak)
+    target_compile_options(build_features INTERFACE ${COMPILE_FLAGS})
+    target_link_options(build_features INTERFACE -fsanitize=address)
+endif()
+
+if (TESTS)
     # main.cpp for manual testing
-    add_executable(main test/main.cpp)
-    target_include_directories(main PRIVATE include)
-    target_compile_options(main PRIVATE ${COMPILE_FLAGS})
-    target_link_options(main PRIVATE -fsanitize=address)
+    set(INSTALL_GTEST OFF CACHE BOOL "Disable install of googletest" FORCE)
+    add_executable(main_test ${CMAKE_SOURCE_DIR}/test/main_test.cpp)
+    target_link_libraries(main_test PRIVATE build_features)
 
     # testing
     include(FetchContent)
@@ -28,24 +57,30 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
-    add_executable(tests test/test_basic.cpp
-                         test/test_funcs.cpp
-                         test/test_ops.cpp)
-    target_include_directories(tests PRIVATE include)
+    add_executable(tests ${CMAKE_SOURCE_DIR}/test/test_basic.cpp
+                         ${CMAKE_SOURCE_DIR}/test/test_funcs.cpp
+                         ${CMAKE_SOURCE_DIR}/test/test_ops.cpp
+                         ${CMAKE_SOURCE_DIR}/test/test_util.cpp)
     target_link_libraries(
       tests
       GTest::gtest_main
     )
+    target_link_libraries(tests build_features)
+    target_link_libraries(tests calc_ins)
 
-    # target_compile_options(main PRIVATE ${COMPILE_FLAGS})
-    # target_link_options(tests PRIVATE -fsanitize=address)
+    add_custom_command(
+        TARGET tests PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/test/test_suite $<TARGET_FILE_DIR:tests>/test_suite)
+
     include(GoogleTest)
     gtest_discover_tests(tests)
 endif()
 
-set(FILES_FOR_INSTALL include/MatrixOperation.hpp
-                      include/MatrixGeneric.hpp
-                      include/Exceptions.hpp)
-
-install(FILES ${FILES_FOR_INSTALL} DESTINATION matrix_calc)
+set(FILES_FOR_INSTALL  ${CMAKE_SOURCE_DIR}/include/MatrixOperation.hpp
+                       ${CMAKE_SOURCE_DIR}/include/MatrixGeneric.hpp
+                       ${CMAKE_SOURCE_DIR}/include/Exceptions.hpp)
+                      
+install(FILES ${FILES_FOR_INSTALL} DESTINATION /usr/include)
+install(TARGETS tspp_calc DESTINATION /usr/bin)
 

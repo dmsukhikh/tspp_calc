@@ -1,41 +1,189 @@
 stages:
   - build
   - test
+  - package
+  - package_test
   - deploy
 
-build-centos-job:
+.standart_package_test:
+  stage: package_test
+  script:
+    - tspp_calc test/test_suite/valid.txt -f
+
+.standart_build:
   stage: build
   script:
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
     - make
-    - ./main
-  tags:
-    - centos
   artifacts:
     paths:
       - "build/"
+    expire_in: 10 minutes
 
-test-centos-job:
+.standart_test:
   stage: test
-  dependencies: 
-    - build-centos-job
   script:
     - cd build
-    - ctest
-  tags:
-    - centos
-
-deploy-centos-job:
-  stage: deploy
-  dependencies: 
-    - build-centos-job
-  script:
-    - cd build
-    - cmake --install . --prefix .. --config Release
-  tags:
-    - centos
+    - ./tests --gtest_output=xml:test_results.xml
+    - valgrind ./tests
+    - cppcheck ../src
   artifacts:
     paths:
-      - "matrix_calc/"
+      - build/test_results.xml
+    reports:
+      junit: build/test_results.xml
+    expire_in: 10 minutes
+
+build-centos-job:
+  extends:
+    .standart_build
+  tags:
+    - centos
+
+build-ubuntu-job:
+  extends:
+    .standart_build
+  tags:
+    - ubuntu
+
+test-centos-job:
+  extends:
+    .standart_test
+  dependencies: 
+    - build-centos-job
+  tags:
+    - centos
+  needs:
+    - job: build-centos-job
+
+test-ubuntu-job:
+  extends:
+    .standart_test
+  dependencies: 
+    - build-ubuntu-job
+  tags:
+    - ubuntu
+  needs:
+    - job: build-ubuntu-job
+
+doc-job:
+  stage: build
+  script:
+    - apt update
+    - apt install doxygen-latex texlive-lang-cyrillic doxygen -y
+    - doxygen Doxyfile
+    - tar -cf doc/html.tar doc/html
+    - cd doc/latex
+    - make
+    - cd ../../
+  artifacts:
+    paths:
+      - doc/html.tar
+      - doc/latex/refman.pdf
+    expire_in: 10 minutes
+  tags:
+    - ubuntu
+
+package-ubuntu-job:
+  stage: package
+  script:
+    - mkdir -p pkg-ubuntu
+    - cd build
+    - cpack -G DEB
+    - mv *.deb ../pkg-ubuntu/
+  needs:
+    - job: test-ubuntu-job
+    - job: build-ubuntu-job
+  dependencies:
+    - build-ubuntu-job
+
+  artifacts:
+    paths:
+      - pkg-ubuntu/
+    expire_in: 10 minutes
+  tags:
+    - ubuntu
+
+package-centos-job:
+  stage: package
+  script:
+    - mkdir -p pkg-centos
+    - cd build
+    - cpack -G RPM
+    - mv *.rpm ../pkg-centos/
+  needs:
+    - job: test-centos-job
+    - job: build-centos-job
+  dependencies:
+    - build-centos-job
+
+  artifacts:
+    paths:
+      - pkg-centos/
+    expire_in: 30 minutes
+  tags:
+    - centos
+
+package-test-ubuntu-job:
+  extends:
+    .standart_package_test
+  before_script:
+    #установка пакета
+    - dpkg -i pkg-ubuntu/*.deb || true
+    #проверка установки
+    - dpkg-deb -c pkg-ubuntu/tspp_calc-1.1-Linux.deb
+    - dpkg -l | grep tspp_calc || echo "Пакет не найден"
+    - dpkg -L tspp_calc || echo "Файлы не найдены"
+
+  needs:
+    - job: package-ubuntu-job
+  dependencies:
+    - package-ubuntu-job
+  tags:
+    - ubuntu
+
+package-test-centos-job:
+  extends:
+    .standart_package_test
+  before_script:
+    # установка пакета
+    - rpm -i pkg-centos/*.rpm || true
+    # проверка установки
+    - rpm -q tspp_calc || echo "Пакет не найден"
+    - rpm -ql tspp_calc || echo "Файлы не найдены"
+
+  needs:
+    - job: package-centos-job
+  dependencies:
+    - package-centos-job
+  tags:
+    - centos
+
+
+
+deploy-job:
+  stage: deploy
+  script:
+    - echo "Upload artifacts"
+  needs:
+    - doc-job
+    - package-ubuntu-job
+    - package-centos-job
+    - package-test-ubuntu-job
+    - package-test-centos-job
+  dependencies:
+    - doc-job
+    - package-ubuntu-job
+    - package-centos-job
+  artifacts:
+    paths:
+      - pkg-centos/
+      - pkg-ubuntu/
+      - doc
+  when: on_success
+  tags:
+    - ubuntu
+
+  
