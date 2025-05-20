@@ -5,6 +5,9 @@ stages:
   - package_test
   - deploy
 
+variables:
+     GIT_SUBMODULE_STRATEGY: recursive
+
 .standart_package_test:
   stage: package_test
   script:
