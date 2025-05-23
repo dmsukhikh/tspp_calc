@@ -49,14 +49,8 @@ if (TESTS)
     target_link_libraries(main_test PRIVATE build_features)
 
     # testing
-    include(FetchContent)
-    FetchContent_Declare(
-      googletest
-      URL https://github.com/google/googletest/archive/6910c9d9165801d8827d628cb72eb7ea9dd538c5.zip
-    )
-    FetchContent_MakeAvailable(googletest)
-
     enable_testing()
+    add_subdirectory(googletest)
     add_executable(tests ${CMAKE_SOURCE_DIR}/test/test_basic.cpp
                          ${CMAKE_SOURCE_DIR}/test/test_funcs.cpp
                          ${CMAKE_SOURCE_DIR}/test/test_ops.cpp
