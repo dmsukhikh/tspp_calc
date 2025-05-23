@@ -50,9 +50,7 @@ if (TESTS)
 
     # testing
     enable_testing()
-    include(GoogleTest)
     add_subdirectory(googletest)
-
     add_executable(tests ${CMAKE_SOURCE_DIR}/test/test_basic.cpp
                          ${CMAKE_SOURCE_DIR}/test/test_funcs.cpp
                          ${CMAKE_SOURCE_DIR}/test/test_ops.cpp
@@ -69,6 +67,7 @@ if (TESTS)
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/test/test_suite $<TARGET_FILE_DIR:tests>/test_suite)
 
+    include(GoogleTest)
     gtest_discover_tests(tests)
 endif()
 
